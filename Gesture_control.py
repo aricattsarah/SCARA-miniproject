@@ -475,4 +475,254 @@ def setup_main_gui(root):
     loop_entry.insert(0, "1")
     loop_entry.pack(side=tk.LEFT)
 
-    speed_frame = tk.Frame(playback_frame, bg=
+    speed_frame = tk.Frame(playback_frame, bg="#15202B")
+    speed_frame.pack(pady=5)
+    speed_label = tk.Label(speed_frame, text="Playback Speed (0-10):", bg="#15202B", fg="#FFFFFF")
+    speed_label.pack(pady=2)
+    playback_speed = tk.DoubleVar(value=5)
+    speed_slider = ttk.Scale(speed_frame, from_=0, to=10, orient=tk.HORIZONTAL, variable=playback_speed, length=200)
+    speed_slider.pack()
+
+    theme_button = ttk.Button(control_frame, text="Toggle Theme", command=toggle_theme, style="TButton")
+    theme_button.pack(pady=10)
+
+    control_mode_var = tk.BooleanVar(value=True)
+    control_mode_switch = ttk.Checkbutton(control_frame, text="Hand Gesture Control", variable=control_mode_var,
+                                          command=toggle_control_mode, style="TButton")
+    control_mode_switch.pack(pady=5)
+    control_mode_label = tk.Label(control_frame, text="Mode: Hand Gesture Control", bg="#15202B", fg="#FFFFFF")
+    control_mode_label.pack(pady=5)
+
+    servo1_label = tk.Label(control_frame, text="Servo 1 (Base, 270°)", bg="#15202B", fg="#FFFFFF")
+    servo1_label.pack(pady=5)
+    servo1_frame = tk.Frame(control_frame, bg="#15202B")
+    servo1_frame.pack(pady=5)
+    servo1_minus = ttk.Button(servo1_frame, text="-", command=lambda: set_slider(1, servo1_slider.get() - 2),
+                              style="TButton", width=2)
+    servo1_minus.pack(side=tk.LEFT, padx=2)
+    servo1_slider = ttk.Scale(servo1_frame, from_=0, to=180, orient=tk.HORIZONTAL,
+                              command=lambda val: servo_queue.put((1, int(float(val)))))
+    servo1_slider.set(90)
+    servo1_slider.pack(side=tk.LEFT, padx=5)
+    servo1_plus = ttk.Button(servo1_frame, text="+", command=lambda: set_slider(1, servo1_slider.get() + 2),
+                             style="TButton", width=2)
+    servo1_plus.pack(side=tk.LEFT, padx=2)
+
+    servo2_label = tk.Label(control_frame, text="Servo 2 (Linear Actuator)", bg="#15202B", fg="#FFFFFF")
+    servo2_label.pack(pady=5)
+    servo2_frame = tk.Frame(control_frame, bg="#15202B")
+    servo2_frame.pack(pady=5)
+    up_button = ttk.Button(servo2_frame, text="Up", command=lambda: move_linear_actuator("up"), style="TButton")
+    up_button.pack(side=tk.LEFT, padx=5)
+    stop_button = ttk.Button(servo2_frame, text="Stop", command=lambda: stop_linear_actuator(), style="TButton")
+    stop_button.pack(side=tk.LEFT, padx=5)
+    down_button = ttk.Button(servo2_frame, text="Down", command=lambda: move_linear_actuator("down"), style="TButton")
+    down_button.pack(side=tk.LEFT, padx=5)
+
+    servo3_label = tk.Label(control_frame, text="Servo 3 (Link 3, 360°)", bg="#15202B", fg="#FFFFFF")
+    servo3_label.pack(pady=5)
+    servo3_frame = tk.Frame(control_frame, bg="#15202B")
+    servo3_frame.pack(pady=5)
+    servo3_minus = ttk.Button(servo3_frame, text="-", command=lambda: set_slider(3, servo3_slider.get() - 5),
+                              style="TButton", width=2)
+    servo3_minus.pack(side=tk.LEFT, padx=2)
+    servo3_slider = ttk.Scale(servo3_frame, from_=0, to=180, orient=tk.HORIZONTAL,
+                              command=lambda val: servo_queue.put((3, int(float(val)))))
+    servo3_slider.set(90)
+    servo3_slider.pack(side=tk.LEFT, padx=5)
+    servo3_plus = ttk.Button(servo3_frame, text="+", command=lambda: set_slider(3, servo3_slider.get() + 5),
+                             style="TButton", width=2)
+    servo3_plus.pack(side=tk.LEFT, padx=2)
+
+    servo4_label = tk.Label(control_frame, text="Servo 4 (Link 4, 180°)", bg="#15202B", fg="#FFFFFF")
+    servo4_label.pack(pady=5)
+    servo4_frame = tk.Frame(control_frame, bg="#15202B")
+    servo4_frame.pack(pady=5)
+    servo4_minus = ttk.Button(servo4_frame, text="-", command=lambda: set_slider(4, servo4_slider.get() - 5),
+                              style="TButton", width=2)
+    servo4_minus.pack(side=tk.LEFT, padx=2)
+    servo4_slider = ttk.Scale(servo4_frame, from_=0, to=180, orient=tk.HORIZONTAL,
+                              command=lambda val: servo_queue.put((4, int(float(val)))))
+    servo4_slider.set(90)
+    servo4_slider.pack(side=tk.LEFT, padx=5)
+    servo4_plus = ttk.Button(servo4_frame, text="+", command=lambda: set_slider(4, servo4_slider.get() + 5),
+                             style="TButton", width=2)
+    servo4_plus.pack(side=tk.LEFT, padx=2)
+
+    gripper_label = tk.Label(control_frame, text="Gripper: Release", bg="#15202B", fg="#FFFFFF")
+    gripper_label.pack(pady=10)
+
+    control_button = ttk.Button(control_frame, text="Switch Control (Servo 1)", command=lambda: switch_control(),
+                                style="TButton")
+    control_button.pack(pady=20)
+
+    status_label = tk.Label(control_frame, text="Hand Detected: No", bg="#15202B", fg="#FFFFFF")
+    status_label.pack(pady=10)
+
+    left_hand_label = tk.Label(control_frame, text="", bg="#15202B", fg="#1DA1F2", font=("Helvetica", 12, "bold"))
+    left_hand_label.pack(pady=5)
+
+    left_hand_state_label = tk.Label(control_frame, text="Left Hand State: None", bg="#15202B", fg="#FFFFFF")
+    left_hand_state_label.pack(pady=5)
+
+    right_hand_state_label = tk.Label(control_frame, text="Right Hand State: None", bg="#15202B", fg="#FFFFFF")
+    right_hand_state_label.pack(pady=5)
+
+    def move_linear_actuator(direction):
+        if current_control == 2:
+            speak(f"Linear Actuator is going {direction}")
+            command = f"S2{direction}"
+            send_to_arduino(command)
+
+    def stop_linear_actuator():
+        if current_control == 2:
+            speak("Linear Actuator stopped")
+            command = "S2stop"
+            send_to_arduino(command)
+
+    def switch_control():
+        global current_control
+        current_control = (current_control % 5) + 1
+        control_names = {1: "Servo 1", 2: "Servo 2", 3: "Servo 3", 4: "Servo 4", 5: "Gripper"}
+        control_button.config(text=f"Switch Control ({control_names[current_control]})")
+        speak(f"Control switched to {control_names[current_control]}")
+
+    def process_camera():
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            print("Error: Could not open camera.")
+            return
+
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+        global hand_detected, gripper_state, left_hand_state, right_hand_state
+        last_servo2_command = None
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("Error: Failed to capture frame.")
+                break
+
+            frame = cv2.flip(frame, 1)
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            results = hands.process(frame_rgb)
+            hand_detected = False
+
+            if results.multi_hand_landmarks and hand_gesture_enabled:
+                hand_detected = True
+                for idx, hand_landmarks in enumerate(results.multi_hand_landmarks):
+                    mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,
+                                           landmark_drawing_spec=mp_draw.DrawingSpec(color=(0, 255, 0), thickness=2,
+                                                                                     circle_radius=2),
+                                           connection_drawing_spec=mp_draw.DrawingSpec(color=(255, 0, 0), thickness=2))
+
+                    handedness = results.multi_handedness[idx].classification[0].label
+                    thumb_tip = hand_landmarks.landmark[4]
+                    index_tip = hand_landmarks.landmark[8]
+                    distance = ((thumb_tip.x - index_tip.x) ** 2 + (thumb_tip.y - index_tip.y) ** 2) ** 0.5
+
+                    if handedness == "Left":
+                        left_hand_label.config(text="Left Hand Detected")
+                        if thumb_tip.y < index_tip.y:
+                            if left_hand_state != "Hold":
+                                left_hand_state = "Hold"
+                        else:
+                            if left_hand_state != "Hold":
+                                left_hand_state = "Release"
+                            if left_hand_state == "Hold":
+                                left_hand_state = "Release"
+                                switch_control()
+                        left_hand_state_label.config(text=f"Left Hand State: {left_hand_state}")
+                        right_hand_state_label.config(text="Right Hand State: None")
+                    else:
+                        left_hand_label.config(text="")
+                        left_hand_state = "Release"
+                        left_hand_state_label.config(text="Left Hand State: None")
+
+                        if current_control in [1, 3, 4]:
+                            slider_value = min(max(int(distance * 600), 0), 180)
+                            if current_control == 1:
+                                servo1_slider.set(slider_value)
+                                servo_queue.put((1, slider_value))
+                            elif current_control == 3:
+                                servo3_slider.set(slider_value)
+                                servo_queue.put((3, slider_value))
+                            elif current_control == 4:
+                                servo4_slider.set(slider_value)
+                                servo_queue.put((4, slider_value))
+                            right_hand_state = "Hold" if distance < 0.15 else "Release" if distance > 0.25 else "Intermediate"
+                            right_hand_state_label.config(text=f"Right Hand State: {right_hand_state}")
+                        elif current_control == 2:
+                            if distance < 0.15:
+                                right_hand_state = "Hold"
+                                if last_servo2_command != "up":
+                                    move_linear_actuator("up")
+                                    last_servo2_command = "up"
+                            elif distance > 0.25:
+                                right_hand_state = "Release"
+                                if last_servo2_command != "down":
+                                    move_linear_actuator("down")
+                                    last_servo2_command = "down"
+                            else:
+                                right_hand_state = "Intermediate"
+                                if last_servo2_command not in [None, "stop"]:
+                                    stop_linear_actuator()
+                                    last_servo2_command = "stop"
+                            right_hand_state_label.config(text=f"Right Hand State: {right_hand_state}")
+                        elif current_control == 5:
+                            if thumb_tip.y < index_tip.y:
+                                if gripper_state != "Hold":
+                                    gripper_state = "Hold"
+                                    send_to_arduino("G1")
+                                    gripper_label.config(text="Gripper: Hold")
+                            else:
+                                if gripper_state != "Release":
+                                    gripper_state = "Release"
+                                    send_to_arduino("G0")
+                                    gripper_label.config(text="Gripper: Release")
+                            right_hand_state = "Hold" if thumb_tip.y < index_tip.y else "Release"
+                            right_hand_state_label.config(text=f"Right Hand State: {right_hand_state}")
+
+            else:
+                left_hand_label.config(text="")
+                left_hand_state = "Release"
+                right_hand_state = "None"
+                left_hand_state_label.config(text="Left Hand State: None")
+                right_hand_state_label.config(text="Right Hand State: None")
+                if last_servo2_command != "stop" and hand_gesture_enabled and current_control == 2:
+                    stop_linear_actuator()
+                    last_servo2_command = "stop"
+                hand_detected = False if not results.multi_hand_landmarks else hand_detected
+
+            status_label.config(text=f"Hand Detected: {'Yes' if hand_detected else 'No'}")
+
+            img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            imgtk = ImageTk.PhotoImage(image=img)
+            camera_frame.imgtk = imgtk
+            camera_frame.configure(image=imgtk)
+
+            time.sleep(0.033)
+
+        cap.release()
+
+    threading.Thread(target=process_camera, daemon=True).start()
+    root.after(100, process_gui_queue)
+    speak("Your SCARA robot is initialized.")
+
+
+root = tk.Tk()
+root.title("SCARA Robot Control")
+root.geometry("1000x700")
+root.withdraw()
+
+show_loading_screen(root)
+root.mainloop()
+
+speech_queue.put(None)
+servo_queue.put((None, None))
+arduino.close()
+hands.close()
+cv2.destroyAllWindows()
