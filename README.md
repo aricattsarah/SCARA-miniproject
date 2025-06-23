@@ -1,121 +1,41 @@
-🤖 SCARA Robot Controller
+# 🤖 SCARA Robot Controller
+This project provides the Arduino and Python code to control a SCARA (Selective Compliance Articulated Robot Arm) using an Adafruit 16-channel PWM driver, servo motors, and serial communication.
+3 types of countrol are implemented
+1. Hand gesture control
+2. Control via a control panel
+3. Control via Flutter (Android phone)
 
-This project provides a complete control system for a SCARA (Selective Compliance Articulated Robot Arm) using Arduino and Python, enhanced with three different control modes:
+## 🛠️ Project Structure
+## ⚙️ Hardware Requirements
 
-1. Hand Gesture Control
+- Arduino Uno / Mega
+- Adafruit 16-Channel PWM Servo Driver (PCA9685)
+- Servo motors (4+1 gripper)
+- External power supply for servos
+- USB cable for serial communication
+## Software Requirements
 
+### Arduino Side
+- [Adafruit PWM Servo Driver Library](https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library)
+- Arduino IDE
 
-2. GUI Control Panel
+### Python Side
+- Python 3.10+
+- `pyserial` package (`pip install pyserial`)
+- PyCharm
 
+## How to Use
 
-3. Mobile App Control via Flutter
+### 1. Upload Arduino Code
+Upload the code from `SCARA-ROBOT/scara_controller.ino` to your Arduino board using the Arduino IDE.
 
+### 2. Run Python Serial Interface
 
+Update `SCARA-ROBOT/hand_gesture.py` with your correct COM port:
 
-The SCARA arm is operated using servo motors through an Adafruit 16-channel PWM driver and communicates via serial (USB) and Wi-Fi.
-
-
----
-
-🗂️ Project Structure
-
-SCARA-ROBOT/
-├── Arduino/
-│   └── scara_controller.ino        # Main Arduino code
-├── Python/
-│   └── hand_gesture.py             # Serial communication & gesture control
-├── Flutter/
-│   └── flutter_controller.dart     # Mobile app for wireless control
-├── README.md
-
-
----
-
-⚙️ Hardware Requirements
-
-Arduino Uno or Mega
-
-Adafruit 16-Channel PWM Servo Driver (PCA9685)
-
-Servo Motors (at least 4 + 1 for gripper)
-
-External Power Supply (for servo motors)
-
-USB Cable (for Arduino-PC communication)
-
-
-
----
-
-💻 Software Requirements
-
-Arduino Side
-
-Arduino IDE
-
-Adafruit PWM Servo Driver Library
-
-
-Python Side
-
-Python 3.10+
-
-pyserial (pip install pyserial)
-
-Optional: PyCharm for editing and running Python scripts
-
-
-Flutter Side
-
-Flutter SDK
-
-Dart
-
-Android Studio (or VS Code)
-
-Android phone on same Wi-Fi network as host PC
-
-
-
----
-
-🚀 How to Use
-
-1. Upload Arduino Code
-
-Open Arduino/scara_controller.ino in the Arduino IDE.
-
-Select the correct board and COM port.
-
-Upload the code to your Arduino board.
-
-
-2. Run Python Gesture Control
-
-Edit the COM port in Python/hand_gesture.py:
-
+`python
 
 arduino = serial.Serial(port='COM3', baudrate=9600, timeout=1)
 
-Run the script to start serial communication and control via hand gestures.
-
-
-3. Use Flutter App for Mobile Control
-
-Ensure both your PC and Android phone are connected to the same Wi-Fi.
-
-Run the Flutter app in Flutter/flutter_controller.dart on your mobile device.
-
-The app sends control signals to the PC or directly to the robot (depending on setup).
-
-
-
----
-
-📌 Notes
-
-Use a separate power supply for servo motors to avoid brownouts or resets.
-
-Check servo limits in the code to prevent hardware damage.
-
-For gesture control, you may need additional hardware like a flex sensor or MPU6050
+### 3. Run the flutter code alone to control the arm via a mobile app (flutter.dart)
+- ensure same wifi is connected by the device and the android mobile  
